@@ -37,6 +37,56 @@ local autoparse = function(trig, body, opts)
 	return ls.parser.parse_snippet(trig, body, opts)
 end
 
+-- Referenced from:
+-- https://github.com/michaelfortunato/dotfiles/blob/a4365bc2eec20c84003e01099edb861f568a299a/nvim/.config/nvim/lua/plugins/luasnip/typst.lua
+-- Slightly modified to add indentation on each row, take cols first, and overall make more readable
+local generate_matrix = function(_, snip)
+	-- We swap cols and rows, so 21mat is horizontal, and 12mat is vertical
+	local cols = tonumber(snip.captures[1])
+	local rows = tonumber(snip.captures[2])
+
+	local nodes = {}
+	local index = 1
+
+	for row = 1, rows, 1 do
+		-- Start out by indenting every line correctly!
+		table.insert(nodes, t("  "))
+
+		table.insert(nodes, r(index, tostring(row) .. "x1", i(1)))
+		index = index + 1
+
+		for col = 2, cols, 1 do
+			table.insert(nodes, t(", "))
+			table.insert(nodes, r(index, tostring(row) .. "x" .. tostring(col), i(1)))
+			index = index + 1
+		end
+
+		table.insert(nodes, t({ ";", "" }))
+	end
+
+	nodes[#nodes] = t(";")
+	return sn(nil, nodes)
+end
+
 return {
 	autoparse("sum", "sum_(i=${1:1})^(${2:N})"),
+
+	s(
+		{
+			trig = "(%d)(%d)mat",
+			regTrig = true,
+			snippetType = "autosnippet",
+		},
+		fmta(
+			[[
+        mat(
+        <>
+        )<>]],
+			{
+				d(1, generate_matrix),
+				i(0),
+			}
+		),
+		{ condition = in_math }
+	),
 }
