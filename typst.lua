@@ -77,7 +77,6 @@ end
 
 return {
 	autoparse("sum", "sum_(i=${1:1})^(${2:N})"),
-	autoparse("*", "dot"),
 	autoparse("ihat", "hat(i)"),
 	autoparse("jhat", "hat(j)"),
 	autoparse("khat", "hat(k)"),
