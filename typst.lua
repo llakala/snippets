@@ -48,9 +48,15 @@ end
 -- https://github.com/pxwg/LM-nvim/blob/418448fa0bea2c29e3abf4b0e7e340a79bc467a0/luasnip/typst_1/matrices.lua#L31
 -- Allows going rowwise or colwise, depending on whether `v` is passed
 local generate_matrix = function(_, snip)
+  local nodes = {}
   local rows = tonumber(snip.captures[1])
   local cols = tonumber(snip.captures[2])
-  local nodes = {}
+
+  -- We allow doing `3mat`, rather than having to write out `33mat`. You only need to provide two parameters if you're
+  -- making a non-square matrix!
+  if cols == nil then
+    cols = rows
+  end
 
   -- If we want to iterate vertically, we'll instead make placeholders like: `$1, $4, $7; $2, $5, $8; $3, $6, $9`
   -- luasnip is smart enough to understand snippet placeholders that aren't in order, so this works!
@@ -89,7 +95,7 @@ return {
 
   s(
     {
-      trig = "(%d)(%d)(v?)mat",
+      trig = "(%d)(%d?)(v?)mat",
       regTrig = true,
       snippetType = "autosnippet",
     },
